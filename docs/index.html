@@ -1,1 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
+  <title>AI Prompt Engineering — Prompting Under Governance</title>
+  <meta name="description" content="AI Prompt Engineering: governance-first laboratories for prompt design, schema discipline, bounded context, stage-gated prompting, critique-revision pipelines, and auditable prompt operations. One book and governed Colab notebooks implementing controlled prompting as an institutional mechanism." />
+
+  <style>
+    :root{
+      --bg:#07080d;
+      --panel:#0f1220;
+      --panel2:#141836;
+      --text:#eef0ff;
+      --muted:#b8bddb;
+      --border:rgba(255,255,255,0.09);
+      --accent:#7aa2ff;
+      --accent2:#6ee7c8;
+      --warn:#ffd27a;
+      --shadow:0 18px 60px rgba(0,0,0,0.45);
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:
+        radial-gradient(900px 600px at 20% 10%, rgba(122,162,255,0.14), transparent 60%),
+        radial-gradient(800px 600px at 80% 90%, rgba(110,231,200,0.10), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      line-height:1.75;
+    }
+    a{color:var(--accent);text-decoration:none;}
+    a:hover{color:var(--accent2);text-decoration:underline;}
+    .container{max-width:1180px;margin:0 auto;padding:48px 22px 96px;}
+
+    h1{font-size:40px;margin:0 0 14px;text-transform:uppercase;letter-spacing:0.02em;}
+    h2{font-size:30px;margin:64px 0 14px;}
+    h3{font-size:19px;margin:0 0 10px;}
+    p{color:var(--muted);max-width:110ch;}
+
+    .hero{
+      padding:44px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(20,24,54,0.95), rgba(15,18,32,0.9));
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+    }
+
+    .callout{
+      margin-top:26px;
+      padding:22px;
+      border-radius:20px;
+      background:linear-gradient(135deg, rgba(122,162,255,0.08), rgba(110,231,200,0.06));
+      border:1px solid rgba(122,162,255,0.22);
+      color:var(--muted);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:20px;
+      margin-top:28px;
+    }
+
+    .card{
+      padding:22px;
+      border-radius:20px;
+      background:var(--panel2);
+      border:1px solid var(--border);
+      box-shadow:0 12px 34px rgba(0,0,0,0.32);
+      display:flex;
+      flex-direction:column;
+      min-height:250px;
+    }
+
+    .card p{margin:0;}
+    .card p + p{margin-top:10px;}
+
+    .card a{
+      display:inline-block;
+      margin-top:auto;
+      padding-top:14px;
+      font-weight:800;
+      letter-spacing:0.03em;
+      text-transform:uppercase;
+      font-size:12px;
+    }
+
+    .reviewbox{
+      margin-top:28px;
+      padding:28px;
+      border-radius:22px;
+      border:1px solid rgba(255,210,122,0.35);
+      background:linear-gradient(135deg, rgba(255,210,122,0.07), rgba(122,162,255,0.06));
+    }
+
+    .stars{
+      color:var(--warn);
+      font-size:20px;
+      font-weight:900;
+      letter-spacing:0.12em;
+      margin-bottom:14px;
+    }
+
+    footer{
+      margin-top:96px;
+      padding-top:32px;
+      border-top:1px solid var(--border);
+      font-size:13px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    .pill{
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(122,162,255,0.22);
+      background:rgba(122,162,255,0.08);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:0.06em;
+      text-transform:uppercase;
+      margin-top:10px;
+    }
+
+    .quicklinks{
+      margin-top:20px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .btn{
+      display:inline-block;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid rgba(122,162,255,0.25);
+      background:rgba(122,162,255,0.08);
+      color:var(--text);
+      font-weight:800;
+      font-size:12px;
+      letter-spacing:0.05em;
+      text-transform:uppercase;
+    }
+
+    .btn:hover{
+      border-color:rgba(110,231,200,0.35);
+      background:rgba(110,231,200,0.10);
+      text-decoration:none;
+      color:var(--text);
+    }
+
+    .mutednote{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:10px;
+      max-width:110ch;
+    }
+
+    code.inline{
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:2px 7px;
+      border-radius:10px;
+      color:var(--text);
+      font-size:0.95em;
+    }
+  </style>
+</head>
+
+<body>
+<main class="container">
+
+<section class="hero">
+  <h1>AI Prompt Engineering</h1>
+  <div class="pill">Prompting Under Governance · Auditable Prompt Systems</div>
+
+  <p>
+    <strong>AI Prompt Engineering</strong> is a governance-first laboratory for designing,
+    testing, and reviewing <strong>prompt systems</strong> as institutional control mechanisms—
+    not as clever wording tricks. In professional settings, bad prompting is not merely a quality issue.
+    It is a control failure: instructions blur with assumptions, evidence boundaries erode,
+    output schemas drift, and persuasive prose can conceal the absence of verification.
+  </p>
+
+  <p>
+    This repository treats prompting as an engineering discipline. A prompt is not decoration.
+    It is a contract: explicit objective, explicit boundary, explicit schema, explicit refusal logic,
+    explicit termination, explicit artifacts. The purpose is not to “get better answers.”
+    The purpose is to create <strong>reviewable prompt pipelines</strong> that a human can inspect,
+    reproduce, challenge, and improve without relying on model mystique.
+  </p>
+
+  <p>
+    Each notebook implements one governed prompting pattern—bounded drafting, schema-first generation,
+    context packing, multi-pass critique and revision, tool-call discipline, and promotion gates.
+    Outputs are marked <strong>Not verified</strong> unless independently validated by qualified humans.
+    That is not legal wallpaper. It is the operating posture of the entire project.
+  </p>
+
+  <div class="callout">
+    <strong>Core premise:</strong> Better prompting is not more persuasive prompting.<br/>
+    <span class="mutednote">
+      Better prompting means clearer boundaries, safer failure modes, stricter evidence separation,
+      stronger reproducibility, and cleaner handoff to human review.
+    </span>
+  </div>
+
+  <div class="quicklinks" aria-label="Quick Links">
+    <a class="btn" href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/book/AI%20PROMPT%20ENGINEERING%20BOOK.pdf" target="_blank" rel="noopener">Read Book (PDF)</a>
+    <a class="btn" href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%201.ipynb" target="_blank" rel="noopener">Open Chapter 1 Notebook</a>
+    <a class="btn" href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%202.ipynb" target="_blank" rel="noopener">Open Chapter 2 Notebook</a>
+    <a class="btn" href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%203.ipynb" target="_blank" rel="noopener">Open Chapter 3 Notebook</a>
+    <a class="btn" href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%204.ipynb" target="_blank" rel="noopener">Open Chapter 4 Notebook</a>
+    <a class="btn" href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%205.ipynb" target="_blank" rel="noopener">Open Chapter 5 Notebook</a>
+  </div>
+
+  <p class="mutednote">
+    Notebook path convention: <code class="inline">/notebooks/CHAPTER%20N.ipynb</code> with URL-encoded spaces.
+  </p>
+</section>
+
+<section>
+  <h2>The Book</h2>
+
+  <p>
+    The book is the governing specification for the repository. It defines what counts as a sound prompt,
+    what counts as a failure mode, and what evidence is required before a prompt can be promoted.
+    The notebooks are operational laboratories: they instantiate the prompt contracts, execute them under
+    bounded conditions, and produce artifacts that make the run auditable.
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>AI Prompt Engineering Book (PDF)</h3>
+      <p>
+        Covers prompt contracts, role boundaries, schema-first prompting, refusal logic,
+        bounded context, multi-pass review, promotion criteria, regression discipline,
+        and artifact-based accountability.
+      </p>
+      <p>
+        The emphasis is institutional: prompting is treated as a governed operating layer,
+        not a collection of one-off hacks.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/book/AI%20PROMPT%20ENGINEERING%20BOOK.pdf" target="_blank" rel="noopener">
+        Read Book (PDF)
+      </a>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Operating rule:</strong> Notebook results are governed experimental outputs.
+    They are <strong>Not verified</strong> unless reviewed, replicated, and approved by a qualified human.
+  </div>
+</section>
+
+<section>
+  <h2>Governed Notebooks (Prompt Patterns as Control Systems)</h2>
+
+  <p>
+    These notebooks do not aim to show “what the model can do.” They show what the prompt system
+    can safely force the model to do under constraint. Each chapter operationalizes a prompting pattern,
+    introduces its control objective, exposes its failure modes, and records whether the run should be
+    promoted, revised, or rejected.
+  </p>
+
+  <div class="grid">
+
+    <div class="card">
+      <h3>Chapter 1 — Why Prompting Needs Governance</h3>
+      <p>
+        Establishes the central claim of the repository: prompting is a control surface.
+        The notebook contrasts loose prompting with contract-style prompting and shows how
+        ambiguity in objective, evidence, and output structure creates institutional risk.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%201.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+    <div class="card">
+      <h3>Chapter 2 — Prompt Contracts and Schema-First Outputs</h3>
+      <p>
+        Converts prompts into explicit contracts with required fields, disallowed behavior,
+        and machine-checkable output schemas. The goal is deterministic reviewability:
+        facts, assumptions, open items, and draft outputs must be structurally separable.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%202.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+    <div class="card">
+      <h3>Chapter 3 — Context Packing and Evidence Boundaries</h3>
+      <p>
+        Focuses on what enters the context window and what must remain outside it.
+        The notebook treats inclusion and exclusion as first-class controls, with evidence packets,
+        omission logs, and explicit handling of missing or conflicting information.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%203.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+    <div class="card">
+      <h3>Chapter 4 — Multi-Pass Prompting: Draft, Critique, Revise</h3>
+      <p>
+        Implements structured multi-pass prompting so that drafting, critique, and revision
+        are separated into governed stages. The system is evaluated not by fluency, but by whether
+        critique identifies unsupported claims and revision resolves them without hidden drift.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%204.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+    <div class="card">
+      <h3>Chapter 5 — Prompt Hardening and Regression Discipline</h3>
+      <p>
+        Treats prompt improvement as change management. Revised prompts must be compared against
+        prior versions under explicit tests, with failure logging, promotion thresholds, and
+        regression-safe acceptance logic.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%205.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+    <div class="card">
+      <h3>Chapter 6 — Tool-Call and Process Discipline</h3>
+      <p>
+        Constrains how prompts instruct the model to use tools, retrieve data, or stop.
+        The notebook emphasizes explicit sequencing, bounded permissions, and clean separation
+        between generation, lookup, validation, and escalation.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%206.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+    <div class="card">
+      <h3>Chapter 7 — Role-Based Prompting and Institutional Voice</h3>
+      <p>
+        Explores how prompts impose role, audience, scope, and tone without collapsing into
+        empty theatrics. The question is not whether the model sounds professional, but whether
+        it respects mandate boundaries and preserves uncertainty under the assigned role.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%207.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+    <div class="card">
+      <h3>Chapter 8 — Evaluation Rubrics and Promotion Gates</h3>
+      <p>
+        Defines what counts as acceptable prompt performance. Rubrics, scorecards,
+        and decision gates convert subjective “this feels better” judgments into
+        explicit criteria for advance, revise, or reject decisions.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%208.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+    <div class="card">
+      <h3>Chapter 9 — Failure Modes, Refusal, and Safe Termination</h3>
+      <p>
+        Shows that a strong prompt system must know when to stop. Refusal,
+        escalation, incomplete output, and verification task lists are treated as
+        valid and often preferable outcomes when conditions are not satisfied.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%209.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+    <div class="card">
+      <h3>Chapter 10 — From Craft to Prompt Operations</h3>
+      <p>
+        Integrates the book into an operational model: versioning, testing, promotion,
+        documentation, artifact retention, and disciplined human oversight. Prompting
+        becomes an institutional workflow rather than an individual trick.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%2010.ipynb" target="_blank" rel="noopener">Open Notebook</a>
+    </div>
+
+  </div>
+
+  <div class="callout">
+    <strong>Notebook invariant:</strong> bounded input packets · explicit prompt contracts · schema validation ·
+    deterministic setup where applicable · stage-gate decisioning · mandatory artifacts ·
+    <strong>verification_status="Not verified"</strong> unless independently confirmed.
+  </div>
+</section>
+
+<section>
+  <h2>What Every Run Produces (Minimum Artifact Standard)</h2>
+
+  <p>
+    Every governed notebook produces a reproducibility and review bundle. The point is not merely to save outputs.
+    The point is to make the prompt run inspectable: what prompt was used, what evidence was passed,
+    what constraints were active, what failed, and why the run was accepted or rejected.
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Run Manifest</h3>
+      <p>
+        <code class="inline">run_manifest.json</code> records run identifiers, configuration,
+        environment fingerprint, and control settings so the experiment can be reproduced
+        instead of merely remembered.
+      </p>
+      <p class="mutednote">
+        Reproducibility is the difference between a prompt anecdote and a prompt system.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Prompt Trace</h3>
+      <p>
+        <code class="inline">prompts_log.jsonl</code> or equivalent records the governed prompt flow:
+        system instructions, user packet structure, critique prompts, revision prompts,
+        and any hashes or redacted copies needed for audit.
+      </p>
+      <p class="mutednote">
+        A prompt you cannot inspect is a prompt you cannot govern.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Final State + Decision</h3>
+      <p>
+        <code class="inline">final_state.json</code> captures the terminal state of the run.
+        <code class="inline">decision.json</code> records whether the prompt version should
+        <strong>advance</strong>, <strong>revise</strong>, or <strong>reject</strong>.
+      </p>
+      <p class="mutednote">
+        Acceptance must follow criteria, not enthusiasm.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Risk Log + Deliverables</h3>
+      <p>
+        <code class="inline">risk_log.json</code> records observed risks, triggered controls,
+        and unresolved issues. <code class="inline">artifacts/</code> stores reports,
+        scorecards, tables, or other outputs created during the run.
+      </p>
+      <p class="mutednote">
+        Missing evidence should generate review tasks, not fabricated confidence.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Shared Governance Spine</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Prompts Are Contracts</h3>
+      <p>
+        Each prompt must define objective, scope, output shape, prohibited behavior,
+        and termination logic. Vague prompting is treated as uncontrolled prompting.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/book/AI%20PROMPT%20ENGINEERING%20BOOK.pdf" target="_blank" rel="noopener">See Governance Spec</a>
+    </div>
+
+    <div class="card">
+      <h3>Facts vs Assumptions vs Open Items</h3>
+      <p>
+        Governed prompting requires structural separation of provided facts,
+        generated assumptions, and unresolved questions. Silent inference creep
+        is a core failure mode.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%202.ipynb" target="_blank" rel="noopener">See Schema Discipline</a>
+    </div>
+
+    <div class="card">
+      <h3>Stop is a Success Condition</h3>
+      <p>
+        Strong prompt systems refuse, escalate, or terminate early when evidence,
+        scope, or validation conditions are not satisfied. More text is not always better output.
+      </p>
+      <a href="https://github.com/alexdibol/ai-prompt-engineering/blob/main/notebooks/CHAPTER%209.ipynb" target="_blank" rel="noopener">See Safe Termination</a>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Professional posture:</strong> Human practitioners retain responsibility at every stage.
+    This repository provides governed mechanisms and auditable artifacts—not autonomous authority.
+  </div>
+</section>
+
+<section>
+  <h2>Who This Repository Is For</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h3>MBA / Master of Finance Cohorts</h3>
+      <p>
+        For students who need to understand prompting as a professional discipline:
+        explicit contracts, bounded evidence, structured outputs, and reviewable failure modes.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Finance and Corporate Practitioners</h3>
+      <p>
+        For analysts, strategists, and decision-support teams who need prompt systems
+        that produce accountable drafts rather than polished but unverifiable narrative.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Researchers and Builders</h3>
+      <p>
+        For anyone designing prompt pipelines that must survive institutional review,
+        version control, regression testing, and real operational scrutiny.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Licensing, Governance & AI Use Disclosure</h2>
+
+  <div class="callout">
+    <p>
+      <strong>Educational / Non-Reliance:</strong> All materials are provided for educational
+      and research purposes only. Nothing in this repository constitutes investment, trading,
+      legal, tax, accounting, audit, or compliance advice.
+    </p>
+
+    <p>
+      <strong>Not verified:</strong> Unless explicitly stated otherwise in a specific artifact,
+      treat all outputs, claims, calculations, citations, summaries, classifications,
+      and conclusions as <strong>Not verified</strong>.
+    </p>
+
+    <p>
+      <strong>Confidentiality and data hygiene:</strong> Do not paste confidential, proprietary,
+      regulated, or personally identifying information into external systems. Use redaction,
+      anonymization, and minimum-necessary input discipline by default.
+    </p>
+
+    <p>
+      <strong>No fabricated sources or claims:</strong> Zero tolerance for invented citations,
+      unsupported numbers, fabricated policies, fictional terms, or ungrounded conclusions.
+      When evidence is missing, the correct output is a verification task list.
+    </p>
+
+    <p>
+      <strong>License:</strong> This project is released under the MIT License.
+      Preserve copyright and license notices.
+    </p>
+
+    <p>
+      <strong>Copyright (c) 2026 Alejandro Reynoso</strong>
+    </p>
+  </div>
+</section>
+
+<footer>
+  AI Prompt Engineering · Prompting Under Governance · Governance-First · Auditable · Reproducible · Human-Accountable
+</footer>
+
+</main>
+</body>
+</html>
